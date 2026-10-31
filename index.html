@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>แจ้งซ่อม</title>
+<style>
+:root{--bg:#f2f5f3;--tx:#14231f;--mut:#5d6f69;--ln:#cdd8d3;--ac:#0b7a5a;--er:#b42318;color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1714;--tx:#e8f0ec;--mut:#9bafa7;--ln:#2d3d37;--ac:#3fbf93;--er:#ff8a7a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.55 system-ui,"Noto Sans Thai",Sarabun,Thonburi,Tahoma,sans-serif}
+main{max-width:480px;margin:0 auto;padding:20px 18px 40px}
+h1{font-size:26px;margin:4px 0 4px}
+.s{color:var(--mut);margin:0 0 8px}
+fieldset{border:0;border-top:1px solid var(--ln);margin:0;padding:6px 0 10px}
+legend,label{display:block;font-weight:600;margin:12px 0 6px;padding:0}
+input,select,textarea{width:100%;font:inherit;color:inherit;background:transparent;border:1px solid var(--ln);border-radius:8px;padding:11px 12px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--ac);outline-offset:1px}
+select option{color:#14231f}
+textarea{min-height:100px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts label{display:flex;align-items:center;gap:8px;font-weight:400;margin:0;padding:11px 12px;border:1px solid var(--ln);border-radius:8px}
+.opts input,.chk input{width:auto}
+.opts label:has(input:checked){border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)}
+.chk{display:flex;align-items:center;gap:10px;font-weight:400}
+#thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#thumbs img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+button{width:100%;margin-top:18px;padding:15px;font:inherit;font-weight:700;color:#fff;background:var(--ac);border:0;border-radius:10px}
+@media(prefers-color-scheme:dark){button{color:#06241a}}
+button:disabled{opacity:.6}
+#err{color:var(--er);margin:12px 0 0;min-height:1.5em}
+.hp{position:absolute;left:-9999px}
+#ok{padding-top:40px}
+#ok .no{font-size:44px;font-weight:800;color:var(--ac);margin:6px 0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>แจ้งซ่อม</h1>
+<p class="s">กรอกให้ครบ ทีมงานจะติดต่อกลับเพื่อนัดช่าง</p>
+<form id="f">
+<fieldset>
+<label for="room">ห้องเลขที่</label><input id="room" maxlength="10" required autocomplete="off">
+<label for="name">ชื่อผู้แจ้ง</label><input id="name" maxlength="60" required autocomplete="name">
+<label for="phone">เบอร์โทรติดต่อ</label><input id="phone" type="tel" inputmode="tel" maxlength="20" required autocomplete="tel">
+</fieldset>
+<fieldset>
+<label for="item">อุปกรณ์ที่เสีย</label>
+<select id="item" required>
+<option value="">เลือกอุปกรณ์</option><option>แอร์</option><option>ก๊อกน้ำ / ท่อน้ำรั่ว</option><option>ชักโครก / ห้องน้ำ</option>
+<option>ไฟฟ้า / หลอดไฟ / ปลั๊ก</option><option>เครื่องทำน้ำอุ่น</option><option>ประตู / กุญแจ</option><option>หน้าต่าง / มุ้งลวด</option>
+<option>อินเทอร์เน็ต / ทีวี</option><option>เฟอร์นิเจอร์</option><option>อื่น ๆ (เขียนในช่องอาการ)</option>
+</select>
+<label for="symptom">อาการที่พบ</label>
+<textarea id="symptom" maxlength="1000" required placeholder="เช่น เปิดแล้วไม่เย็น มีน้ำหยด เริ่มเป็นตั้งแต่เมื่อวาน"></textarea>
+<label for="photos">รูปประกอบ (สูงสุด 5 รูป)</label>
+<input id="photos" type="file" accept="image/*" multiple>
+<div id="thumbs"></div>
+</fieldset>
+<fieldset>
+<label for="date">วันที่สะดวกให้ช่างเข้า</label><input id="date" type="date" required>
+<legend>ช่วงเวลาที่สะดวก</legend>
+<div class="opts">
+<label><input type="radio" name="slot" value="เช้า 09:00–12:00" required>เช้า 09–12</label>
+<label><input type="radio" name="slot" value="บ่าย 13:00–17:00">บ่าย 13–17</label>
+<label><input type="radio" name="slot" value="เย็น 17:00–20:00">เย็น 17–20</label>
+<label><input type="radio" name="slot" value="สะดวกทั้งวัน">ทั้งวัน</label>
+</div>
+<label class="chk" style="margin-top:14px"><input id="enter" type="checkbox">ไม่อยู่ห้องก็ให้ช่างเข้าได้</label>
+</fieldset>
+<input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<button id="go">ส่งแจ้งซ่อม</button>
+<div id="err" role="alert"></div>
+</form>
+<section id="ok" hidden>
+<p class="s">ส่งแจ้งซ่อมแล้ว</p>
+<div class="no" id="no"></div>
+<p>ทีมงานจะติดต่อกลับเพื่อนัดช่าง เก็บเลขที่งานนี้ไว้อ้างอิงได้เลย</p>
+</section>
+</main>
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyC7I3sDoxrhq_ZEokYCalext4omViRJeZJW3g5elNBdsMDuMjtRVOYc8X4ibmBiY2z1w/exec';
+const $ = id => document.getElementById(id);
+$('date').min = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+let files = [];
+$('photos').onchange = e => {
+  files = [...e.target.files].slice(0, 5);
+  $('thumbs').innerHTML = '';
+  files.forEach(f => $('thumbs').append(Object.assign(new Image(), { src: URL.createObjectURL(f), alt: '' })));
+};
+// ย่อรูปในมือถือก่อนส่ง (ด้านยาวสุด 1280px, JPEG) เพื่อส่งเร็วและไม่เปลืองพื้นที่ Drive
+const shrink = f => new Promise((ok, no) => {
+  const i = new Image();
+  i.onload = () => {
+    const k = Math.min(1, 1280 / Math.max(i.naturalWidth, i.naturalHeight)), c = document.createElement('canvas');
+    c.width = Math.round(i.naturalWidth * k); c.height = Math.round(i.naturalHeight * k);
+    c.getContext('2d').drawImage(i, 0, 0, c.width, c.height);
+    ok(c.toDataURL('image/jpeg', 0.72).split(',')[1]);
+  };
+  i.onerror = () => no(new Error('อ่านรูปไม่ได้ ลองเลือกรูปอื่น'));
+  i.src = URL.createObjectURL(f);
+});
+const rid = crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2); // ส่งซ้ำไม่เกิดแถวซ้ำ
+$('f').onsubmit = async e => {
+  e.preventDefault();
+  const b = $('go'), err = $('err');
+  err.textContent = ''; b.disabled = true; b.textContent = 'กำลังส่ง…';
+  try {
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API)) throw new Error('ยังไม่ได้ใส่ลิงก์ Apps Script ในไฟล์ index.html');
+    const slot = document.querySelector('input[name=slot]:checked');
+    const body = { rid, website: $('website').value, room: $('room').value, name: $('name').value, phone: $('phone').value,
+      item: $('item').value, symptom: $('symptom').value, date: $('date').value, slot: slot ? slot.value : '',
+      enter: $('enter').checked, photos: await Promise.all(files.map(shrink)) };
+    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'ส่งไม่สำเร็จ');
+    $('no').textContent = j.id; $('f').hidden = true; $('ok').hidden = false; scrollTo(0, 0);
+  } catch (x) {
+    err.textContent = x instanceof TypeError ? 'เน็ตมีปัญหา กดส่งอีกครั้งได้เลย (ไม่ซ้ำ)' : x.message;
+    b.disabled = false; b.textContent = 'ส่งแจ้งซ่อม';
+  }
+};
+</script>
+</body>
+</html>
